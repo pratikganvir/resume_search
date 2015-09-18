@@ -45,3 +45,5 @@ end
 
 gem 'carrierwave'
 gem 'pdf-reader'
+gem 'aws-sdk'
+gem 'fog'
