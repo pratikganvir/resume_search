@@ -1,19 +1,7 @@
-<%= form_for(@resume) do |f| %>
-  <% if @resume.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@resume.errors.count, "error") %> prohibited this resume from being saved:</h2>
-
-      <ul>
-      <% @resume.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
+<%= form_for(@resume, :multipart => true) do |f| %>
   <div class="field">
     <%= f.label :resume_pdf_file %><br>
-    <%= f.text_field :resume_pdf_file %>
+    <%= f.file_field :resume_pdf_file, :required => true %>
   </div>
   <div class="actions">
     <%= f.submit %>

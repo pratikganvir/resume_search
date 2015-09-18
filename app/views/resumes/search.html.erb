@@ -1,0 +1,35 @@
+<%= form_tag '/resumes/search', method: 'GET', id: 'searchform' do %>
+  <div class="field">
+    <%= text_field_tag  'search_term',params[:search_term],id: 'field', placeholder: 'Search resume...' %>
+  </div>
+  <div class="actions">
+    <%= submit_tag 'Search', id: 'submit' %>
+  </div>
+<% end %>
+<%= link_to 'Upload New Resume', new_resume_path %> <br/>
+<% if params[:search_term].nil?  %>
+<% elsif  @resumes.present? %>
+<h1>Search Result for '<%= params[:search_term] %>'</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Resume pdf file</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @resumes.each do |resume| %>
+      <tr>
+        <td><%= resume.resume_pdf_file.file.filename %></td>
+        <td><%= link_to 'Download', resume %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<% else %>
+<h1>No search result found for '<%= params[:search_term] %>'</h1>
+<% end %>

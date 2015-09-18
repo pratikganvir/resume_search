@@ -10,6 +10,7 @@ class ResumesController < ApplicationController
   # GET /resumes/1
   # GET /resumes/1.json
   def show
+    send_file File.open(@resume.resume_pdf_file.path), :disposition => 'attachment'
   end
 
   # GET /resumes/new
@@ -24,17 +25,29 @@ class ResumesController < ApplicationController
   # POST /resumes
   # POST /resumes.json
   def create
-    @resume = Resume.new(resume_params)
+  if resume_params[:resume_pdf_file].nil?
+    redirect_to :action => :new, :notice => 'Please select pdf file'
+  elsif File.extname(resume_params[:resume_pdf_file].tempfile) == '.pdf'
+      @resume = Resume.new(resume_params)
+      reader = PDF::Reader.new(resume_params[:resume_pdf_file].tempfile)
+      text = []
 
-    respond_to do |format|
-      if @resume.save
-        format.html { redirect_to @resume, notice: 'Resume was successfully created.' }
-        format.json { render :show, status: :created, location: @resume }
-      else
-        format.html { render :new }
-        format.json { render json: @resume.errors, status: :unprocessable_entity }
+      reader.pages.each do |page|
+        text << page.text
       end
-    end
+      @resume.resume_text = text.join
+      respond_to do |format|
+        if @resume.save
+          format.html { redirect_to @resume, notice: 'Resume was successfully created.' }
+          format.json { render :show, status: :created, location: @resume }
+        else
+          format.html { render :new }
+          format.json { render json: @resume.errors, status: :unprocessable_entity }
+        end
+      end
+   else
+    redirect_to :action => :new, :notice => 'Please select pdf file'
+   end
   end
 
   # PATCH/PUT /resumes/1
@@ -61,6 +74,10 @@ class ResumesController < ApplicationController
     end
   end
 
+  def search
+    @resumes = Resume.where('resume_text like ?',"%#{params[:search_term]}%") if params[:search_term]
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_resume
@@ -69,6 +86,6 @@ class ResumesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def resume_params
-      params.require(:resume).permit(:resume_pdf_file)
+      params.require(:resume).permit(:resume_pdf_file,:resume_text)
     end
 end
